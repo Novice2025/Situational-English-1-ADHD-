@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXTATION: Lego Disruptive Chain Block Method™</title>
+    <!-- Google Fonts for global typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+    <!--
+        INLINE STYLES FOR INITIAL LOAD AND ROBUSTNESS:
+        These styles are included directly in the HTML to ensure the core "Batman Computer / Star Wars Console"
+        aesthetic is present immediately upon load, even before external CSS might fully parse or if you're
+        viewing the raw HTML without a build process. They carefully implement the color variables and design
+        specifics from the NEXTATION WEBSITE COLOUR SYSTEM AND USAGE.pdf.
+        In a live Vue.js environment, many of these would typically be defined in your SCSS files, but here,
+        they provide critical visual stability for the production-ready `index.html` frame.
+    -->
+    <style>
+        /* Global Colour Variables and Design Tokens - as defined in src/assets/styles/_variables.scss */
+        :root {
+            /* Core backgrounds */
+            --bg-main: #02030b; /* Page background */
+            --bg-gradient: radial-gradient(circle at top, #1c1f3b 0%, #050716 45%, #02030b 100%);
+            /* Surfaces / Cards */
+            --card-bg: rgba(15, 18, 40, 0.92); /* Lesson panels */
+            --card-soft-bg: rgba(18, 21, 50, 0.88); /* Tab cards and navigation buttons */
+            /* Neon accents */
+            --accent-cyan: #4ef2ff; /* Cyan highlight around edges */
+            --accent-pink: #ff2f92; /* Magenta highlight for buttons */
+            --accent-green: #4dff9b; /* Success / tab completed mark */
+            --accent-yello: #ffe25f; /* Accent blended in text gradients */
+            --accent-purple: #aa5dff; /* Hover glows and edges */
+            /* Text and borders */
+            --muted: rgba(255,255,255,0.65);
+            --border-glow: rgba(120,120,255,0.45);
+            /* Shadows */
+            --shadow-strong: 0 0 36px rgba(130,80,255,0.6);
+            --shadow-soft: 0 0 20px rgba(0,0,0,0.65);
+            /* Radii and transitions */
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+            --transition-fast: 0.18s ease-out;
+            --transition-med: 0.28s ease-out;
+
+            /* Component-specific colors for tabs (Section 5 from PDF) */
+            --tab-normal-bg: radial-gradient(circle at top, rgba(255,255,255,0.09), rgba(7,10,28,0.96));
+            --tab-normal-border: rgba(130,140,200,0.4);
+            --tab-hover-border-strong: rgba(120,120,255,0.6);
+            --tab-hover-shadow: 0 0 20px rgba(120,120,255,0.35);
+            --tab-active-bg: radial-gradient(circle at top, rgba(255,255,255,0.15), rgba(21,13,51,0.98));
+            --tab-active-border: rgba(103,255,196,0.9);
+            --tab-active-shadow: 0 0 24px rgba(79,255,204,0.6);
+            --tab-completed-bg: radial-gradient(circle at top, rgba(77,255,155,0.1), rgba(10,30,15,0.96));
+            --tab-completed-border: rgba(77,255,155,0.6);
+            --tab-completed-shadow: 0 0 15px rgba(77,255,155,0.4);
+        }
+
+        /* Base styles for the entire page */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-main);
+            background-image: var(--bg-gradient);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header styling */
+        header {
+            background: linear-gradient(to right, rgba(15,18,40,0.95), rgba(6,8,26,0.95));
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border-glow);
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center header content */
+            position: relative;
+            z-index: 1000; /* Ensure header is on top */
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            max-width: 1200px; /* Constrain header width */
+            width: 100%;
+        }
+
+        .teacher-orb {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at center, var(--accent-cyan) 0%, var(--accent-purple) 60%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 25px var(--accent-cyan), 0 0 40px var(--accent-purple);
+            animation: pulse-orb 3s infinite alternate ease-in-out;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse-orb {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.08); opacity: 1; }
+        }
+
+        .logo-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px rgba(78,242,255,0.7);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9em;
+            color: var(--muted);
+            margin: 0;
+            text-shadow: 0 0 5px rgba(255,255,255,0.2);
+        }
+
+        /* Main application container */
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            gap: 30px;
+            max-width: 1200px; /* Constrain main content width */
+            margin: 0 auto; /* Center the container */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Tab navigation styling */
+        .tab-navigation {
+            display: flex;
+            flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
+            justify-content: center;
+            gap: 15px;
+            padding: 20px 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-strong);
+            width: 100%;
+            max-width: 1000px; /* Limit tab navigation width */
+            box-sizing: border-box;
+        }
+
+        .tab-item {
+            background: var(--tab-normal-bg);
+            border: 1px solid var(--tab-normal-border);
+            border-radius: var(--radius-md);
+            padding: 12px 20px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1em;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: all var(--transition-med);
+            text-align: center;
+            flex-shrink: 0; /* Prevent tabs from shrinking */
+            white-space: nowrap; /* Keep tab titles on one line */
+        }
+
+        .tab-item:hover {
+            border-color: var(--tab-hover-border-strong);
+            box-shadow: var(--tab-hover-shadow);
+            color: var(--accent-cyan);
+        }
+
+        .tab-item.active {
+            background: var(--tab-active-bg);
+            border-color: var(--tab-active-border);
+            box-shadow: var(--tab-active-shadow);
+            color: var(--accent-green);
+            font-weight: bold;
+            cursor: default;
+        }
+
+        .tab-item.completed {
+            background: var(--tab-completed-bg);
+            border-color: var(--tab-completed-border);
+            box-shadow: var(--tab-completed-shadow);
+            color: var(--accent-green);
+            position: relative;
+        }
+
+        .tab-item.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.7em;
+            color: var(--accent-green);
+            text-shadow: 0 0 5px rgba(77,255,155,0.7);
+        }
+
+        /* Lesson panel styling */
+        .lesson-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-strong);
+            width: 100%;
+            max-width: 800px; /* Limit lesson panel width */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .lesson-panel h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--accent-cyan);
+            font-size: 1.8em;
+            margin-top: 0;
+            text-shadow: 0 0 10px rgba(78,242,255,0.5);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .lesson-panel h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--accent-yello);
+            font-size: 1.4em;
+            border-bottom: 1px solid rgba(255,226,95,0.3);
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        .lesson-panel p {
+            color: rgba(255,255,255,0.9);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .lesson-panel em {
+            color: var(--accent-pink);
+            text-shadow: 0 0 5px rgba(255,47,146,0.5);
+            font-style: normal; /* Override default italic for better readability with neon glow */
+        }
+
+        .lesson-panel strong {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 5px rgba(78,242,255,0.5);
+        }
+
+        .lesson-panel .separator {
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--border-glow), transparent);
+            margin: 30px auto;
+            opacity: 0.5;
+        }
+
+        /* Specific section styling */
+        .section-box {
+            background: rgba(18, 21, 50, 0.88);
+            border: 1px solid rgba(120,120,255,0.45);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-box.error {
+            background: rgba(255, 47, 146, 0.1);
+            border: 1px solid var(--accent-pink);
+        }
+
+        .section-box.success {
+            background: rgba(77, 255, 155, 0.1);
+            border: 1px solid var(--accent-green);
+        }
+
+        .section-box p.highlight {
+            font-weight: bold;
+            color: var(--accent-green);
+            text-shadow: 0 0 5px #4dff9b;
+        }
+
+        .section-box input[type="text"], .section-box textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 10px;
+            background: rgba(2,6,32,0.95);
+            border: 1px solid var(--accent-purple);
+            border-radius: var(--radius-sm);
+            color: #ffffff;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 40px;
+            box-sizing: border-box;
+        }
+
+        .section-box button {
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-purple));
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all var(--transition-fast);
+            box-shadow: 0 0 10px rgba(255,47,146,0.4);
+        }
+
+        .section-box button:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(255,47,146,0.6);
+            transform: translateY(-2px);
+        }
+
+        .section-box .options label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid rgba(120,120,255,0.2);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+
+        .section-box .options label:hover {
+            background: rgba(120,120,255,0.1);
+            border-color: var(--accent-purple);
+        }
+
+        .section-box .options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .section-box .options label.correct {
+            background: rgba(77, 255, 155, 0.2);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 8px rgba(77, 255, 155, 0.4);
+        }
+
+        .section-box .options label.incorrect {
+            background: rgba(255, 47, 146, 0.2);
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 8px rgba(255, 47, 146, 0.4);
+        }
+
+        /* Footer styling */
+        footer {
+            background: linear-gradient(to right, rgba(6,8,26,0.95), rgba(15,18,40,0.95));
+            padding: 20px 40px;
+            text-align: center;
+            color: var(--muted); /* Muted text (Section 13 from PDF) */
+            font-size: 0.85em;
+            margin-top: auto; /* Pushes footer to the bottom */
+            border-top: 1px solid rgba(120,120,255,0.1);
+            width: 100%;
+            box-sizing: border-box;
+            word-spacing: 0.05em;
+        }
+
+        footer .highlight-name {
+            color: var(--accent-cyan); /* Brand accent (Section 13 from PDF) */
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(78,242,255,0.5);
+        }
+
+        footer span {
+            color: var(--accent-pink); /* Heart color, using accent-pink for consistency */
+        }
+
+        /* Responsive adjustments as per design (Section 14 from PDF) */
+        @media (max-width: 768px) {
+            header, footer {
+                padding: 15px 20px;
+            }
+
+            .main-container {
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .logo-title {
+                font-size: 1.4em;
+            }
+
+            .logo-subtitle {
+                font-size: 0.8em;
+            }
+
+            .tab-navigation {
+                padding: 15px 0;
+                gap: 10px;
+            }
+
+            .tab-item {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+
+            .lesson-panel {
+                padding: 25px;
+            }
+
+            .lesson-panel h2 {
+                font-size: 1.5em;
+            }
+
+            .lesson-panel p {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER SECTION -->
+    <header>
+        <div class="header-content">
+            <div class="teacher-orb"></div>
+            <div>
+                <h1 class="logo-title">Daby's Lego Disruptive Chain Block Method™</h1>
+                <p class="logo-subtitle">Thinking simulator for English mastery</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <div class="main-container">
+        <!-- TAB NAVIGATION STRIP -->
+        <nav class="tab-navigation" id="tab-navigation">
+            <!-- Tabs will be dynamically generated here by JavaScript -->
+        </nav>
+
+        <!-- LESSON PANEL - This is where dynamic content will be loaded -->
+        <section class="lesson-panel" id="app">
+            <h2 id="lesson-title">Welcome to NEXTATION: IMMERSIVE LEARNING PLATFORM!</h2>
+            <div id="lesson-content">
+                <p>
+                    🚨 Esta é a plataforma imersiva que vai mudar a sua forma de se comunicar em inglês. Aqui, você não vai apenas **aprender**; você vai **cair de cabeça** nas situações reais e **pensar como um nativo** antes mesmo de falar.
+                </p>
+                <p>
+                    🧠 Esqueça as aulas chatas de gramática! Focamos em te ensinar o **julgamento**, o **timing**, o **tom** e a **escolha** de palavras, exatamente como um nativo faz. Cada "tab" (situação) é um novo desafio da vida real.
+                </p>
+                <p>
+                    Clique em uma das situações acima para começar sua jornada e transformar seu inglês!
+                </p>
+                <p style="margin-top: 25px; font-weight: bold; color: var(--accent-green); text-shadow: 0 0 8px #4dff9b;">
+                    Let's make you think in English, not translate!
+                </p>
+                <div class="separator"></div>
+                <p style="font-size: 0.9em; text-align: center; color: var(--muted);">
+                    *(The specific content for each lesson will load here dynamically when you click a tab.)*
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER SECTION -->
+    <footer>
+        <p>&copy; 2026 Crafted with <span>&#10084;</span> by <span class="highlight-name">Daby</span>. All rights reserved.</p>
+        <p>Powered by the 🧠 Lego Disruptive Chain Block Method™.</p>
+    </footer>
+
+    <!--
+        JavaScript for dynamic tab content and interaction.
+        In a real Vue.js app, this would be in main.js and use Vue's reactivity.
+        For a self-contained HTML, we're embedding the logic here.
+    -->
+    <script>
+        // Data structure for all 10 lessons
+        const lessons = [
+            {
+                id: 'situation-1',
+                tabTitle: 'Situation 1',
+                expression: 'What can I get you?',
+                sections: {
+                    brazilianThinking: `
+                        <p>Você está no balcão de uma loja, no seu escritório recebendo um cliente, ou talvez num evento, sendo o anfitrião. A pessoa está ali, olhando, talvez um pouco perdida. A gente, no Brasil, costuma ser direto, né? <em style="color: var(--accent-pink);">"Posso ajudar?"</em> ou <em style="color: var(--accent-pink);">"O que você precisa?"</em>, talvez até um <em style="color: var(--accent-pink);">"O que o senhor deseja?"</em>. A intenção é clara: oferecer serviço, fazer a pessoa se sentir à vontade, ou simplesmente iniciar o atendimento. É uma abordagem que busca eficiência e acolhimento. Mas, no inglês, essa "eficiência" pode soar um pouco... diferente.</p>
+                    `,
+                    nativeThinking: `
+                        <p>When serving or helping, natives offer politely. It opens the conversation, showing readiness to assist while being respectful. It's an invitation, not a demand.</p>
+                    `,
+                    commonMistakes: `
+                        <div class="section-box error">
+                            <p style="font-weight: bold; color: var(--accent-pink); font-size: 1.1em; margin-bottom: 5px;">1. "What do you want?"</p>
+                            <p style="color: rgba(255,255,255,0.9); line-height: 1.4;">
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Why it sounds weird:</strong> This is too direct, even aggressive. It can sound demanding or impatient, like you're annoyed they haven't spoken yet. Very <em style="color: var(--accent-pink);">unprofessional</em>.
+                                <br>
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Por que soa estranho:</strong> É muito direto, até agressivo. Pode soar como uma exigência ou impaciência, como se você estivesse irritado por a pessoa ainda não ter falado. Extremamente <em style="color: var(--accent-pink);">não profissional.</em>
+                            </p>
+                        </div>
+                        <div class="section-box error">
+                            <p style="font-weight: bold; color: var(--accent-pink); font-size: 1.1em; margin-bottom: 5px;">2. "Can I help you?"</p>
+                            <p style="color: rgba(255,255,255,0.9); line-height: 1.4;">
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Why it sounds weak:</strong> While grammatically correct, it's often used when someone *looks* like they need help, not as a general greeting or offer of service where you're *expecting* an order. It can imply a problem. It's not the best default for starting service.
+                                <br>
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Por que soa fraco:</strong> Embora gramaticalmente correto, é frequentemente usado quando alguém *parece* precisar de ajuda, não como uma saudação geral ou oferta de serviço onde você *espera* um pedido. Pode implicar um problema. Não é o melhor padrão para iniciar um atendimento.
+                            </p>
+                        </div>
+                    `,
+                    synonyms: `
+                        <div class="section-box">
+                            <p style="font-weight: bold; color: var(--accent-cyan); font-size: 1.1em; margin-bottom: 5px;">Other Common Synonyms / Alternatives:</p>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"How can I help you?"</strong> (More formal, problem-solving context)</li>
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"Are you being helped?"</strong> (When approaching someone who might already be assisted)</li>
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"What can I do for you?"</strong> (Similar to "What can I get you?", slightly broader)</li>
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"May I help you?"</strong> (Polite, slightly more formal than "Can I help you?")</li>
+                            </ul>
+                        </div>
+                    `,
+                    scenarioQuestion: {
+                        question: `
+                            <p>Imagine você é um garçom em um restaurante elegante e um novo cliente acaba de se sentar à mesa. Você quer se aproximar para pegar o pedido. Qual a melhor frase para iniciar o atendimento?</p>
+                        `,
+                        options: [
+                            { text: 'A) "What do you want?"', isCorrect: false },
+                            { text: 'B) "Can I help you?"', isCorrect: false },
+                            { text: 'C) "What can I get you?"', isCorrect: true }
+                        ],
+                        explanation: `
+                            <p style="color: rgba(255,255,255,0.9); font-size: 0.9em; margin-top: 10px;">
+                                <strong style="color: var(--accent-yello);">Por quê?</strong> "What can I get you?" é a expressão mais natural e acolhedora para iniciar um atendimento em um restaurante ou bar. Ela convida o cliente a fazer um pedido diretamente, sem soar agressiva ou como se estivesse resolvendo um problema.
+                            </p>
+                        `
+                    }
+                }
+            },
+            {
+                id: 'situation-2',
+                tabTitle: 'Situation 2',
+                expression: 'I will have...',
+                sections: {
+                    brazilianThinking: `
+                        <p>🚨 Imagine você está em um restaurante chique, ou talvez num bar movimentado. O garçom vem te atender e você precisa fazer seu pedido. Essa situação é <strong>super comum</strong> e, no Brasil, a gente tem um jeito bem direto de falar. Mas em inglês, a escolha das palavras pode mudar tudo – da sua imagem de profissional ao tom da sua conversa.</p>
+                        <p>🧠 Aqui, vamos te ensinar a pensar como um nativo antes de abrir a boca. Qual a sua intenção real? Cortesia? Eficiência? O ambiente é formal ou informal? Cada detalhe importa.</p>
+                        <p>Você vai aprender a usar as expressões certas para que seu pedido saia <strong>natural</strong> e <strong>confiante</strong>, não traduzido e roboticamente. Esqueça o "I want"! Isso pode soar como uma criança pedindo algo. Vamos te dar as ferramentas para você se expressar com a fluidez de um nativo, focando na intenção e no impacto da sua fala.</p>
+                    `,
+                    nativeThinking: `
+                        <p>When ordering food or drinks, natives use polite, indirect phrasing. It's about expressing a choice, not a demand. This shows respect and good manners.</p>
+                    `,
+                    commonMistakes: `
+                        <div class="section-box error">
+                            <p style="font-weight: bold; color: var(--accent-pink); font-size: 1.1em; margin-bottom: 5px;">1. "I want..."</p>
+                            <p style="color: rgba(255,255,255,0.9); line-height: 1.4;">
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Why it sounds weird:</strong> This is too direct and can sound demanding or childish. It lacks politeness and can be perceived as rude in a service setting.
+                                <br>
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Por que soa estranho:</strong> É muito direto e pode soar exigente ou infantil. Falta polidez e pode ser percebido como rude em um ambiente de serviço.
+                            </p>
+                        </div>
+                        <div class="section-box error">
+                            <p style="font-weight: bold; color: var(--accent-pink); font-size: 1.1em; margin-bottom: 5px;">2. "Give me..."</p>
+                            <p style="color: rgba(255,255,255,0.9); line-height: 1.4;">
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Why it sounds weak:</strong> This is an imperative and is extremely rude in almost any context when ordering. It's a command, not a request.
+                                <br>
+                                <strong style="color: var(--accent-yello); text-shadow: 0 0 5px rgba(255,226,95,0.5);">Por que soa fraco:</strong> Isso é um imperativo e é extremamente rude em quase qualquer contexto ao fazer um pedido. É uma ordem, não um pedido.
+                            </p>
+                        </div>
+                    `,
+                    synonyms: `
+                        <div class="section-box">
+                            <p style="font-weight: bold; color: var(--accent-cyan); font-size: 1.1em; margin-bottom: 5px;">Other Common Synonyms / Alternatives:</p>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"I'll get..."</strong> (Very common, casual, and polite)</li>
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"Could I get..."</strong> (Polite, slightly more formal, good for adding items)</li>
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"May I have..."</strong> (More formal, often used in higher-end establishments)</li>
+                                <li style="margin-bottom: 8px; color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-green);">"I'd like..."</strong> (Polite and versatile)</li>
+                            </ul>
+                        </div>
+                    `,
+                    scenarioQuestion: {
+                        question: `
+                            <p>Você está em um café e o barista pergunta o que você gostaria. Você decidiu pedir um cappuccino. Qual a forma mais natural e educada de fazer seu pedido?</p>
+                        `,
+                        options: [
+                            { text: 'A) "I want a cappuccino."', isCorrect: false },
+                            { text: 'B) "Give me a cappuccino."', isCorrect: false },
+                            { text: 'C) "I\'ll have a cappuccino, please."', isCorrect: true }
+                        ],
+                        explanation: `
+                            <p style="color: rgba(255,255,255,0.9); font-size: 0.9em; margin-top: 10px;">
+                                <strong style="color: var(--accent-yello);">Por quê?</strong> "I'll have a cappuccino, please" é a forma mais comum e educada de fazer um pedido em um café. O "I'll have" é uma contração de "I will have" e soa natural, enquanto "please" adiciona a cortesia esperada.
+                            </p>
+                        `
+                    }
+                }
+            },
+            {
+                id: 'situation-3',
+                tabTitle: 'Situation 3',
+                expression: 'Can you hear me?',
+                sections: {
+                    brazilianThinking: `<p>Você está numa chamada de vídeo ou áudio e a conexão está ruim. A primeira coisa que vem à mente é verificar se a outra pessoa está te ouvindo. No Brasil, a gente pergunta direto: <em style="color: var(--accent-pink);">"Você me ouve?"</em> ou <em style="color: var(--accent-pink);">"Está me ouvindo?"</em>. É uma checagem rápida e funcional.</p>`,
+                    nativeThinking: `<p>When checking audio, natives use clear, concise phrases. They aim to confirm audibility without sounding accusatory or demanding. Politeness is key, even in technical issues.</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "Are you listening to me?"</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> This implies the person is *choosing* not to listen, not that there's a technical issue. It's accusatory.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"Am I coming through clearly?"</li><li style="color: var(--accent-green);">"Can you hear me okay?"</li><li style="color: var(--accent-green);">"Is my audio working?"</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Você está em uma conferência online e percebe que sua voz pode não estar chegando bem. Como você pergunta aos participantes se eles estão te ouvindo?</p>`,
+                        options: [
+                            { text: 'A) "Are you listening to me?"', isCorrect: false },
+                            { text: 'B) "Can you hear me?"', isCorrect: true },
+                            { text: 'C) "Do you hear?"', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "Can you hear me?" é a forma mais direta e natural para verificar a audibilidade em uma chamada.</p>`
+                    }
+                }
+            },
+            {
+                id: 'situation-4',
+                tabTitle: 'Situation 4',
+                expression: 'Loud and clear',
+                sections: {
+                    brazilianThinking: `<p>Alguém te pergunta se você está ouvindo bem. No Brasil, a gente responde com <em style="color: var(--accent-pink);">"Alto e claro!"</em> ou <em style="color: var(--accent-pink);">"Perfeito!"</em>. É uma confirmação enfática de que a comunicação está ótima, sem ruídos ou problemas.</p>`,
+                    nativeThinking: `<p>Natives use this phrase to confirm excellent audio quality. It's a strong, positive affirmation that communication is perfect, without any issues.</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "Yes, I hear you very good."</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> "Very good" is grammatically incorrect here; it should be "very well." "Loud and clear" is more idiomatic and concise.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"Crystal clear!"</li><li style="color: var(--accent-green);">"Perfectly!"</li><li style="color: var(--accent-green);">"I can hear you perfectly."</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Seu colega pergunta: "Can you hear me okay?" e a qualidade do áudio está excelente. Qual a melhor resposta?</p>`,
+                        options: [
+                            { text: 'A) "Yes, very good."', isCorrect: false },
+                            { text: 'B) "Loud and clear!"', isCorrect: true },
+                            { text: 'C) "I hear you well."', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "Loud and clear!" é a resposta idiomática e mais natural para confirmar que o áudio está perfeito.</p>`
+                    }
+                }
+            },
+            {
+                id: 'situation-5',
+                tabTitle: 'Situation 5',
+                expression: 'Fancy a drink?',
+                sections: {
+                    brazilianThinking: `<p>Você está com amigos ou colegas e quer oferecer algo para beber. No Brasil, a gente pergunta: <em style="color: var(--accent-pink);">"Quer uma bebida?"</em> ou <em style="color: var(--accent-pink);">"Topa uma bebida?"</em>. É um convite direto e informal para socializar e relaxar.</p>`,
+                    nativeThinking: `<p>Natives use "fancy a drink?" as a casual, friendly invitation. It's less direct than "do you want," implying a relaxed social setting and an open offer.</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "Do you want a drink?"</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> While grammatically correct, it can sound a bit blunt or less inviting than "fancy a drink?" in a casual social context.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"Would you like a drink?"</li><li style="color: var(--accent-green);">"How about a drink?"</li><li style="color: var(--accent-green);">"Can I get you something to drink?"</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Você está em casa com um amigo e quer oferecer uma bebida. Qual a forma mais casual e amigável de perguntar?</p>`,
+                        options: [
+                            { text: 'A) "Do you want a drink?"', isCorrect: false },
+                            { text: 'B) "Fancy a drink?"', isCorrect: true },
+                            { text: 'C) "I offer you a drink."', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "Fancy a drink?" é uma expressão britânica muito comum e amigável para oferecer uma bebida em um contexto informal.</p>`
+                    }
+                }
+            },
+            {
+                id: 'situation-6',
+                tabTitle: 'Situation 6',
+                expression: 'Fancy something to eat?',
+                sections: {
+                    brazilianThinking: `<p>Você está com alguém e percebe que já é hora de comer ou quer oferecer um lanche. No Brasil, a gente pergunta: <em style="color: var(--accent-pink);">"Quer comer alguma coisa?"</em> ou <em style="color: var(--accent-pink);">"Topa um lanche?"</em>. É um convite informal para compartilhar uma refeição ou um snack.</p>`,
+                    nativeThinking: `<p>Similar to "fancy a drink?", this is a casual, friendly way to offer food. It's an open invitation, implying a relaxed setting, and is less direct than "do you want to eat?".</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "Do you want to eat something?"</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> Grammatically fine, but "fancy something to eat?" is more idiomatic and natural in casual British English, sounding more inviting.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"Are you hungry?"</li><li style="color: var(--accent-green);">"Would you like something to eat?"</li><li style="color: var(--accent-green);">"How about some food?"</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Você está em casa com um amigo depois de um longo dia e quer oferecer algo para comer. Qual a forma mais casual e amigável de perguntar?</p>`,
+                        options: [
+                            { text: 'A) "Do you want to eat something?"', isCorrect: false },
+                            { text: 'B) "Fancy something to eat?"', isCorrect: true },
+                            { text: 'C) "I will make food for you."', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "Fancy something to eat?" é uma expressão britânica muito comum e amigável para oferecer comida em um contexto informal.</p>`
+                    }
+                }
+            },
+            {
+                id: 'situation-7',
+                tabTitle: 'Situation 7',
+                expression: 'After you',
+                sections: {
+                    brazilianThinking: `<p>Você está em uma porta, elevador ou em um corredor estreito e quer ceder a passagem para alguém. No Brasil, a gente diz <em style="color: var(--accent-pink);">"Pode ir!"</em>, <em style="color: var(--accent-pink);">"Depois de você!"</em> ou simplesmente gesticula. É um gesto de cortesia e respeito.</p>`,
+                    nativeThinking: `<p>Natives use "after you" as a polite way to offer someone to go first. It's a common courtesy, showing respect and deference in shared spaces.</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "Go first!"</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> This is too direct and can sound like a command rather than a polite offer. It lacks the nuance of courtesy.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"Please, go ahead."</li><li style="color: var(--accent-green);">"You first." (More casual)</li><li style="color: var(--accent-green);">"Allow me." (If opening a door for them)</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Você e um colega chegam à porta de uma sala ao mesmo tempo. Você quer que ele entre primeiro. Qual a expressão mais educada?</p>`,
+                        options: [
+                            { text: 'A) "Go first!"', isCorrect: false },
+                            { text: 'B) "After you."', isCorrect: true },
+                            { text: 'C) "You can pass."', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "After you" é a expressão idiomática padrão para ceder a passagem de forma educada.</p>`
+                    }
+                }
+            },
+            {
+                id: 'situation-8',
+                tabTitle: 'Situation 8',
+                expression: 'I am running late',
+                sections: {
+                    brazilianThinking: `<p>Você está atrasado para um compromisso e precisa avisar. No Brasil, a gente diz <em style="color: var(--accent-pink);">"Estou atrasado"</em> ou <em style="color: var(--accent-pink);">"Vou me atrasar"</em>. É uma comunicação direta da sua situação para gerenciar expectativas.</p>`,
+                    nativeThinking: `<p>Natives use "I'm running late" to politely inform others of a delay. It's a common, concise phrase that conveys the situation without needing lengthy explanations.</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "I am delayed."</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> While understandable, "delayed" is usually used for inanimate objects (flights, trains). For people, "running late" is the natural idiom.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"I'm going to be a bit late."</li><li style="color: var(--accent-green);">"I'm behind schedule."</li><li style="color: var(--accent-green);">"I'll be there shortly." (If only a small delay)</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Você está a caminho de uma reunião importante e percebe que vai chegar 10 minutos atrasado. Como você avisa seu chefe por mensagem?</p>`,
+                        options: [
+                            { text: 'A) "I am delayed for the meeting."', isCorrect: false },
+                            { text: 'B) "I am running late for the meeting."', isCorrect: true },
+                            { text: 'C) "I will arrive late."', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "I am running late" é a expressão mais natural e profissional para informar um atraso pessoal.</p>`
+                    }
+                }
+            },
+            {
+                id: 'situation-9',
+                tabTitle: 'Situation 9',
+                expression: 'How about I make some tea?',
+                sections: {
+                    brazilianThinking: `<p>Você está em casa ou no trabalho e quer oferecer para fazer um chá (ou café) para alguém. No Brasil, a gente pergunta: <em style="color: var(--accent-pink);">"Que tal eu fazer um chá?"</em> ou <em style="color: var(--accent-pink);">"Posso fazer um chá para você?"</em>. É uma oferta de hospitalidade e cuidado.</p>`,
+                    nativeThinking: `<p>Natives use "how about I make some tea?" as a polite, indirect offer of hospitality. It's an inviting suggestion, not a direct question, common in home or office settings.</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "Do you want me to make tea?"</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> Grammatically correct, but "how about I make some tea?" is a softer, more natural, and inviting way to offer, especially in British English.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"Can I get you some tea?"</li><li style="color: var(--accent-green);">"Would you like some tea?"</li><li style="color: var(--accent-green);">"I'm making tea, would you like some?"</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Um colega parece cansado no escritório. Você quer oferecer para fazer um chá para ele. Qual a melhor forma de oferecer?</p>`,
+                        options: [
+                            { text: 'A) "Do you want me to make tea?"', isCorrect: false },
+                            { text: 'B) "How about I make some tea?"', isCorrect: true },
+                            { text: 'C) "I will make tea for you."', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "How about I make some tea?" é uma oferta gentil e comum, que soa mais natural do que uma pergunta direta.</p>`
+                    }
+                }
+            },
+            {
+                id: 'situation-10',
+                tabTitle: 'Situation 10',
+                expression: 'I commute to work by...',
+                sections: {
+                    brazilianThinking: `<p>Alguém pergunta como você vai para o trabalho. No Brasil, a gente diz <em style="color: var(--accent-pink);">"Eu vou para o trabalho de carro/ônibus/metrô"</em>. É uma resposta direta sobre o meio de transporte utilizado no dia a dia.</p>`,
+                    nativeThinking: `<p>Natives use "I commute to work by..." to describe their regular travel method. "Commute" implies a regular journey, and "by" specifies the mode of transport.</p>`,
+                    commonMistakes: `
+                        <div class="section-box error"><p style="font-weight: bold; color: var(--accent-pink);">1. "I go to work with car."</p><p style="color: rgba(255,255,255,0.9);"><strong style="color: var(--accent-yello);">Why it sounds weird:</strong> "With car" is incorrect; it should be "by car." Also, "commute" is the more natural verb for regular travel to work.</p></div>
+                    `,
+                    synonyms: `
+                        <div class="section-box"><p style="font-weight: bold; color: var(--accent-cyan);">Other Common Synonyms / Alternatives:</p><ul><li style="color: var(--accent-green);">"I take the bus/train/car to work."</li><li style="color: var(--accent-green);">"My commute is by..."</li><li style="color: var(--accent-green);">"I drive/walk/cycle to work."</li></ul></div>
+                    `,
+                    scenarioQuestion: {
+                        question: `<p>Um novo colega de trabalho pergunta: "How do you get to work?" Como você responde que vai de metrô?</p>`,
+                        options: [
+                            { text: 'A) "I go to work with subway."', isCorrect: false },
+                            { text: 'B) "I commute to work by subway."', isCorrect: true },
+                            { text: 'C) "I take subway to work."', isCorrect: false }
+                        ],
+                        explanation: `<p><strong style="color: var(--accent-yello);">Por quê?</strong> "I commute to work by subway" é a forma mais natural e idiomática. "By" é a preposição correta para meios de transporte.</p>`
+                    }
+                }
+            }
+        ];
+
+        let currentLessonIndex = -1; // -1 for welcome screen
+        let activeTabElement = null;
+
+        function renderLesson(lessonIndex) {
+            const lesson = lessons[lessonIndex];
+            const lessonContentDiv = document.getElementById('lesson-content');
+            const lessonTitleH2 = document.getElementById('lesson-title');
+
+            lessonTitleH2.textContent = lesson.tabTitle + ': ' + lesson.expression;
+            lessonContentDiv.innerHTML = ''; // Clear previous content
+
+            // Section 1: Brazilian Thinking
+            lessonContentDiv.innerHTML += `
+                <h2 style="font-family: 'Space Grotesk', sans-serif; color: var(--accent-cyan); font-size: 1.8em; margin-top: 0; text-shadow: 0 0 10px rgba(78,242,255,0.5); text-align: center; margin-bottom: 25px;">
+                    🔹 SECTION 1 — BRAZILIAN THINKING (PORTUGUESE) 🇧🇷
+                </h2>
+                <div class="section-box">
+                    ${lesson.sections.brazilianThinking}
+                </div>
+                <div class="separator"></div>
+            `;
+
+            // Section 2: Native Thinking
+            lessonContentDiv.innerHTML += `
+                <h2 style="font-family: 'Space Grotesk', sans-serif; color: var(--accent-cyan); font-size: 1.8em; margin-top: 0; text-shadow: 0 0 10px rgba(78,242,255,0.5); text-align: center; margin-bottom: 25px;">
+                    🔹 SECTION 2 — NATIVE THINKING (ENGLISH) 🇺🇸🇬🇧
+                </h2>
+                <div class="section-box">
+                    ${lesson.sections.nativeThinking}
+                </div>
+                <div class="separator"></div>
+            `;
+
+            // Section 3: Student Guess
+            lessonContentDiv.innerHTML += `
+                <h2 style="font-family: 'Space Grotesk', sans-serif; color: var(--accent-cyan); font-size: 1.8em; margin-top: 0; text-shadow: 0 0 10px rgba(78,242,255,0.5); text-align: center; margin-bottom: 25px;">
+                    🔹 SECTION 3 — YOUR TURN TO GUESS! ✍️
+                </h2>
+                <div class="section-box">
+                    <p>Baseado no que você aprendeu, como você diria a expressão principal desta situação em inglês?</p>
+                    <textarea id="student-guess-s3" placeholder="Escreva sua resposta aqui..."></textarea>
+                    <button onclick="revealSections(3)">REVEAL ANSWER & MISTAKES</button>
+                </div>
+                <div class="separator"></div>
+            `;
+
+            // Sections 4, 5, 6, 7 (initially hidden)
+            lessonContentDiv.innerHTML += `
+                <div id="hidden-sections-4-7" style="display: none;">
+                    <!-- Section 4: Highlight Answer + Common Mistakes -->
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; color: var(--accent-cyan); font-size: 1.8em; margin-top: 0; text-shadow: 0 0 10px rgba(78,242,255,0.5); text-align: center; margin-bottom: 25px;">
+                        🔹 SECTION 4 — NATIVE EXPRESSION & COMMON MISTAKES 🚨
+                    </h2>
+                    <div class="section-box success">
+                        <p class="highlight">The Native Expression: "${lesson.expression}"</p>
+                    </div>
+                    ${lesson.sections.commonMistakes}
+                    <div class="separator"></div>
+
+                    <!-- Section 5: Other Common Synonyms -->
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; color: var(--accent-cyan); font-size: 1.8em; margin-top: 0; text-shadow: 0 0 10px rgba(78,242,255,0.5); text-align: center; margin-bottom: 25px;">
+                        🔹 SECTION 5 — OTHER COMMON SYNONYMS 💡
+                    </h2>
+                    ${lesson.sections.synonyms}
+                    <div class="separator"></div>
+
+                    <!-- Section 6: Student Write Again -->
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; color: var(--accent-cyan); font-size: 1.8em; margin-top: 0; text-shadow: 0 0 10px rgba(78,242,255,0.5); text-align: center; margin-bottom: 25px;">
+                        🔹 SECTION 6 — WRITE IT AGAIN! ✍️
+                    </h2>
+                    <div class="section-box">
+                        <p>Agora que você viu a resposta e os sinônimos, escreva a expressão principal novamente, ou uma das alternativas que você aprendeu:</p>
+                        <textarea id="student-guess-s6" placeholder="Escreva sua resposta aqui..."></textarea>
+                        <button onclick="revealSections(6)">CHECK YOUR UNDERSTANDING</button>
+                    </div>
+                    <div class="separator"></div>
+
+                    <!-- Section 7: Scenario-based Question (initially hidden within this block) -->
+                    <div id="hidden-section-7" style="display: none;">
+                        <h2 style="font-family: 'Space Grotesk', sans-serif; color: var(--accent-cyan); font-size: 1.8em; margin-top: 0; text-shadow: 0 0 10px rgba(78,242,255,0.5); text-align: center; margin-bottom: 25px;">
+                            🔹 SECTION 7 — APPLY YOUR KNOWLEDGE ✅
+                        </h2>
+                        <div class="section-box">
+                            ${lesson.sections.scenarioQuestion.question}
+                            <div class="options" id="scenario-options">
+                                ${lesson.sections.scenarioQuestion.options.map((option, idx) => `
+                                    <label>
+                                        <input type="radio" name="scenario-q" value="${idx}" data-correct="${option.isCorrect}">
+                                        ${option.text}
+                                    </label>
+                                `).join('')}
+                            </div>
+                            <button onclick="checkScenarioAnswer()">CHECK ANSWER</button>
+                            <div id="scenario-explanation" style="margin-top: 15px; display: none;">
+                                ${lesson.sections.scenarioQuestion.explanation}
+                            </div>
+                        </div>
+                        <div class="separator"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function revealSections(triggerSection) {
+            if (triggerSection === 3) {
+                document.getElementById('hidden-sections-4-7').style.display = 'block';
+            } else if (triggerSection === 6) {
+                document.getElementById('hidden-section-7').style.display = 'block';
+            }
+        }
+
+        function checkScenarioAnswer() {
+            const optionsDiv = document.getElementById('scenario-options');
+            const explanationDiv = document.getElementById('scenario-explanation');
+            const radios = optionsDiv.querySelectorAll('input[type="radio"]');
+            let selectedCorrect = false;
+
+            radios.forEach(radio => {
+                const label = radio.closest('label');
+                label.classList.remove('correct', 'incorrect');
+                if (radio.checked) {
+                    if (radio.dataset.correct === 'true') {
+                        label.classList.add('correct');
+                        selectedCorrect = true;
+                    } else {
+                        label.classList.add('incorrect');
+                    }
+                }
+            });
+
+            explanationDiv.style.display = 'block';
+
+            if (selectedCorrect && currentLessonIndex !== -1) {
+                // Mark tab as completed
+                const tabElement = document.querySelector(`.tab-item[data-lesson-id="${lessons[currentLessonIndex].id}"]`);
+                if (tabElement && !tabElement.classList.contains('completed')) {
+                    tabElement.classList.add('completed');
+                }
+            }
+        }
+
+        function setActiveTab(tabElement, lessonIndex) {
+            if (activeTabElement) {
+                activeTabElement.classList.remove('active');
+            }
+            tabElement.classList.add('active');
+            activeTabElement = tabElement;
+            currentLessonIndex = lessonIndex;
+            renderLesson(lessonIndex);
+        }
+
+        // Initialize tabs
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabNavigation = document.getElementById('tab-navigation');
+            lessons.forEach((lesson, index) => {
+                const tabItem = document.createElement('div');
+                tabItem.classList.add('tab-item');
+                tabItem.textContent = lesson.tabTitle;
+                tabItem.dataset.lessonId = lesson.id; // Store lesson ID for easy lookup
+                tabItem.addEventListener('click', () => setActiveTab(tabItem, index));
+                tabNavigation.appendChild(tabItem);
+            });
+
+            // Set initial active tab (Situation 1)
+            if (lessons.length > 0) {
+                const firstTab = tabNavigation.querySelector('.tab-item');
+                if (firstTab) {
+                    setActiveTab(firstTab, 0);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
